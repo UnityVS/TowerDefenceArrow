@@ -17,6 +17,7 @@ public class Tower : MonoBehaviour
     [SerializeField] float _attackDamage = 0.1f;
     [SerializeField] float _attackRadius = 5f;
     [SerializeField] Bullet _bullet;
+    Bullet _currentFireBullet;
     private void Update()
     {
         _timer += Time.deltaTime;
@@ -68,9 +69,13 @@ public class Tower : MonoBehaviour
         {
             if (Vector3.Distance(_currentEnemy.transform.position, transform.position) < _attackRadius)
             {
-                Bullet newBullet = Instantiate(_bullet, transform.position, Quaternion.identity);
-                newBullet.StartCoroutine(newBullet.WaitToCollapse(_currentEnemy, _attackDamage));
-                _timer = 0;
+                if (_currentFireBullet == null)
+                {
+                    Bullet newBullet = Instantiate(_bullet, transform.position, Quaternion.identity);
+                    _currentFireBullet = newBullet;
+                    newBullet.StartCoroutine(newBullet.WaitToCollapse(_currentEnemy, _attackDamage));
+                    _timer = 0;
+                }
             }
         }
         else

@@ -3,11 +3,9 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    float _bulletSpeed = 0.2f;
+    float _bulletSpeed = 1f;
     public void FlyToEnemy()
     {
-
-
     }
     public IEnumerator WaitToCollapse(Enemy enemy, float attackDamage)
     {
