@@ -969,7 +969,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _mainCamera: {fileID: 330585545}
-  _towerBrefab: {fileID: 5308153745503186958, guid: 017889dd4270d224da69f84e0f6fa7e8,
+  _towerPrefab: {fileID: 5308153745503186958, guid: 017889dd4270d224da69f84e0f6fa7e8,
     type: 3}
   _buildPlacement: {fileID: 5033816479422055919, guid: 100d6480f41d79c44929cd9551405e84,
     type: 3}

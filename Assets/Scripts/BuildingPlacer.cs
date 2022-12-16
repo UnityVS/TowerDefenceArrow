@@ -3,14 +3,13 @@ using UnityEngine;
 public class BuildingPlacer : MonoBehaviour
 {
     [SerializeField] Camera _mainCamera;
-    [SerializeField] Tower _towerBrefab;
+    [SerializeField] Tower _towerPrefab;
     [SerializeField] BuildPlacement _buildPlacement;
     BuildPlacement _buildPlacementRay;
     Material _originalMaterial;
     [SerializeField] Material _canBuild, _cantBuild;
     void Update()
     {
-
         if (_buildPlacementRay != null && Input.GetMouseButton(1))
         {
             Destroy(_buildPlacementRay);
@@ -40,6 +39,7 @@ public class BuildingPlacer : MonoBehaviour
                 if (Input.GetMouseButtonUp(0) && _buildPlacementRay != null)
                 {
                     _buildPlacementRay.meshRenderer.material = _originalMaterial;
+                    _buildPlacementRay.SetBuild();
                     _buildPlacementRay = null;
                 }
             }
@@ -48,6 +48,14 @@ public class BuildingPlacer : MonoBehaviour
                 if (_buildPlacementRay != null)
                 {
                     _buildPlacementRay.meshRenderer.material = _cantBuild;
+                }
+            }
+            if (hit.collider.GetComponent<BuildPlacement>() is BuildPlacement placeForBuild)
+            {
+                if (Input.GetMouseButtonUp(0))
+                {
+                    Instantiate(_towerPrefab, placeForBuild.transform.position, Quaternion.identity);
+                    Destroy(placeForBuild.gameObject);
                 }
             }
         }
