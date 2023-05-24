@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 
 public enum TowerStates
@@ -10,6 +11,7 @@ public enum TowerStates
 public class Tower : MonoBehaviour
 {
     TowerStates _currentTowerState = TowerStates.Idle;
+    string _objectID;
     Enemy _currentEnemy;
     float _timer = 0;
     [SerializeField] float _searchDelayTimer = 0.5f;
@@ -18,74 +20,49 @@ public class Tower : MonoBehaviour
     [SerializeField] float _attackRadius = 5f;
     [SerializeField] Bullet _bullet;
     Bullet _currentFireBullet;
-    private void Update()
+
+    private void Awake()
     {
-        _timer += Time.deltaTime;
-        if (_timer >= _searchDelayTimer && _currentTowerState == TowerStates.Idle && _currentEnemy == null)
-        {
-            _currentTowerState = TowerStates.Search;
-            SearchEnemy();
-            return;
-        }
-        if (_currentEnemy != null && _currentTowerState != TowerStates.Attack)
-        {
-            _currentTowerState = TowerStates.Attack;
-            InvokeRepeating(nameof(AttackEnemy), 0f, _attackSpeed);
-        }
-        else if (_timer >= _attackSpeed && _currentEnemy == null)
-        {
-            _timer = 0;
-        }
+        _objectID = GetInstanceID().ToString();
+        InvokeRepeating(nameof(SearchEnemy), 0f, _searchDelayTimer);
     }
+
     void SearchEnemy()
     {
-        float newDistance;
-        float topDistance = 0f;
-        for (int i = 0; i < EnemyManager.Instance._enemyList.Count; i++)
-        {
-            newDistance = Vector3.Distance(EnemyManager.Instance._enemyList[i].transform.position, transform.position);
-            if (newDistance < _attackRadius)
-            {
-                if (topDistance != 0f)
-                {
-                    if (newDistance < topDistance)
-                    {
-                        _currentEnemy = EnemyManager.Instance._enemyList[i];
-                        topDistance = newDistance;
-                    }
-                }
-                else
-                {
-                    _currentEnemy = EnemyManager.Instance._enemyList[i];
-                    topDistance = newDistance;
-                }
-            }
-        }
-        _currentTowerState = TowerStates.Idle;
+        if (_currentEnemy && Vector3.Distance(_currentEnemy.transform.position, transform.position) > _attackRadius)
+            SetState(null, TowerStates.Search, _objectID);
+        if (_currentEnemy != null) return;
+        _currentEnemy = EnemyManager.Instance._enemyList
+        .Where(enemy => Vector3.Distance(enemy.transform.position, transform.position) < _attackRadius)
+        .OrderBy(enemy => Vector3.Distance(enemy.transform.position, transform.position))
+        .FirstOrDefault();
+        if (_currentEnemy && Vector3.Distance(_currentEnemy.transform.position, transform.position) < _attackRadius)
+            MonoCustom.Instance.StartRepeatingCoroutineWithOUTArg(delegate { AttackEnemy(); }, _attackSpeed, _objectID);
     }
+
     void AttackEnemy()
     {
         if (_currentEnemy != null)
         {
             if (Vector3.Distance(_currentEnemy.transform.position, transform.position) < _attackRadius)
             {
-                if (_currentFireBullet == null)
-                {
-                    Bullet newBullet = Instantiate(_bullet, transform.position, Quaternion.identity);
-                    _currentFireBullet = newBullet;
-                    newBullet.StartCoroutine(newBullet.WaitToCollapse(_currentEnemy, _attackDamage));
-                    _timer = 0;
-                }
+                Bullet newBullet = Instantiate(_bullet, transform.position, Quaternion.identity);
+                _currentFireBullet = newBullet;
+                newBullet.StartCoroutine(newBullet.WaitToCollapse(_currentEnemy, _attackDamage, this, _objectID));
+                _timer = 0;
             }
-        }
-        else
-        {
-            CancelInvoke(nameof(AttackEnemy));
-            _currentEnemy = null;
-            _currentTowerState = TowerStates.Search;
-            SearchEnemy();
+            else
+                SetState(null, TowerStates.Search, _objectID);
         }
     }
+
+    public void SetState(Enemy enemyValue, TowerStates state, string invokeName)
+    {
+        MonoCustom.Instance.StopRepeatingCoroutineWithOUTArg(invokeName);
+        _currentEnemy = enemyValue;
+        _currentTowerState = state;
+    }
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.DrawWireSphere(transform.position, _attackRadius);

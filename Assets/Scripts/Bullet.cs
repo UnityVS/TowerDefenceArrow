@@ -4,10 +4,7 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
     float _bulletSpeed = 1f;
-    public void FlyToEnemy()
-    {
-    }
-    public IEnumerator WaitToCollapse(Enemy enemy, float attackDamage)
+    public IEnumerator WaitToCollapse(Enemy enemy, float attackDamage, Tower towerAttacked, string invokerObjectID)
     {
         while (true)
         {
@@ -17,14 +14,15 @@ public class Bullet : MonoBehaviour
                 transform.Translate((enemy.transform.position - transform.position).normalized * _bulletSpeed);
                 if (Vector3.Distance(transform.position, enemy.transform.position) < 0.5f && enemy != null)
                 {
-                    enemy.GetHealthInfo().TakeDamage(attackDamage);
-                    Destroy(gameObject);
+                    enemy.GetHealthInfo().TakeDamage(attackDamage, towerAttacked, enemy, invokerObjectID);
+                    break;
                 }
             }
             else
             {
-                Destroy(gameObject);
+                break;
             }
         }
+        Destroy(gameObject);
     }
 }

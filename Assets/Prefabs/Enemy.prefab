@@ -176,6 +176,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _navigationPoints: []
   _health: {fileID: 765355790694928488}
+  _walkSpeed: 0.001
 --- !u!114 &765355790694928488
 MonoBehaviour:
   m_ObjectHideFlags: 0

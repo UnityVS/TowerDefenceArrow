@@ -7,7 +7,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] List<Transform> _navigationPoints = new List<Transform>();
     [SerializeField] Health _health;
     int _currentNavigationPoint = 0;
-    float _walkSpeed = 0.1f;
+    [SerializeField] float _walkSpeed = 10f;
     private void Start()
     {
         _navigationPoints = EnemyManager.Instance.GetNavigationPoints();
